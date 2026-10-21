@@ -1,25 +1,53 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite the article below."
 title: "MLmrpi: Machine Learning Multi-Response Performance Index"
+type: software
 version: 1.1.0
 date-released: 2026-10-21
 license: MIT
 repository-code: "https://github.com/CivilEngineeringSoft/MLmrpi"
+url: "https://github.com/CivilEngineeringSoft/MLmrpi"
 authors:
   - family-names: "Cirhuza Badesire"
     given-names: "Paterne"
-    affiliation: "Université Claude Bernard Lyon 1, LMC² (EA 7427)"
+    affiliation: "Université Claude Bernard Lyon 1, LMC² (EA 7427), Villeurbanne, France"
 keywords:
   - machine learning
   - model ranking
+  - model evaluation
   - multi-response optimization
+  - multi-criteria decision making
   - grey relational analysis
+  - performance index
+  - recycled aggregate concrete
 preferred-citation:
   type: article
-  title: "<final title of the paper>"
+  title: "Ranking Machine Learning Models for Predicting Recycled Aggregate Concrete Properties: Application of Multi-Response Methods"
   authors:
     - family-names: "Cirhuza Badesire"
       given-names: "Paterne"
-  journal: "<journal>"
+      affiliation: "Université Claude Bernard Lyon 1, LMC² (EA 7427), Villeurbanne, France; Université Libre des Pays des Grands Lacs (ULPGL), Goma, DR Congo"
+    - family-names: "Di Cesare"
+      given-names: "Noëlie"
+      affiliation: "Université Claude Bernard Lyon 1, LMC² (EA 7427), Villeurbanne, France"
+    - family-names: "Vu"
+      given-names: "Xuan Hong"
+      email: "xuan-hong.vu@univ-lyon1.fr"
+      affiliation: "Université Claude Bernard Lyon 1, LMC² (EA 7427), Villeurbanne, France"
+    - family-names: "Bishweka"
+      given-names: "Chérif"
+      affiliation: "Université Libre des Pays des Grands Lacs (ULPGL), Goma, DR Congo"
+  # Once the article is accepted: replace the status line by
+  #   journal: "<journal name>"
+  #   volume: <volume>
+  #   start: <first page or article number>
+  #   doi: "<doi>"
+  # and update the year if needed.
+  status: in-preparation
   year: 2026
-  doi: "<doi>"
+  keywords:
+    - machine learning
+    - ranking
+    - metrics
+    - multi-response
+    - performance
