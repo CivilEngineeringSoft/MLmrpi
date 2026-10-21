@@ -9,7 +9,7 @@ description = "MLmrpi: Machine Learning Multi-Response Performance Index for ran
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
-authors = [{ name = "Paterne Cirhuza Badesire", email = "badesirepaternes@gmail.com" }]
+authors = [{ name = "Paterne Cirhuza Badesire et al."}]
 keywords = ["machine learning", "model evaluation", "model ranking", "multi-criteria decision making",
             "grey relational analysis", "multi-response optimization", "performance index", "regression"]
 classifiers = [
