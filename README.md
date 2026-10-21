@@ -69,8 +69,8 @@ print(r.best_model())            # best model by consensus rank
 agr = r.agreement()              # Cohen's κ matrix, Fleiss' κ, Kendall's W
 print(agr["fleiss_kappa"], agr["kendall_w"])
 
-r.plot("scores", save="mlmrpi_scores.png")   # bar charts, one per method
-r.to_excel("mlmrpi_results.xlsx")            # every table in one workbook
+r.plot("bars", save="mlmrpi_ranking.pdf")   # grouped bars with ranks (paper Fig. 11)
+r.to_excel("mlmrpi_results.xlsx")           # every table in one workbook
 ```
 
 Single method, functional style:
@@ -86,9 +86,40 @@ ranks = rank_scores(grade)       # 1 = best
 ```bash
 mlmrpi rank my_metrics.csv
 mlmrpi rank my_metrics.csv --phase Test --methods GRA MRNV
-mlmrpi rank my_metrics.csv --objective Train_Time=smaller --out results.xlsx --plot scores.png
+mlmrpi rank my_metrics.csv --objective Train_Time=smaller --out results.xlsx --plot ranking.png
+mlmrpi analyze my_metrics.csv --figures figs --fmt pdf   # full analysis of the paper
 mlmrpi demo                      # runs on the paper's dataset
 ```
+
+### 4. Full analysis across data partitions (as in the paper)
+
+When the table holds the metrics of several partitions (`Train_*`, `Test_*`, `Total_*`),
+`PartitionAnalysis` ranks every partition separately, adds a joint *Train+Test* ranking,
+and produces every table and figure of the paper:
+
+```python
+from mlmrpi import PartitionAnalysis
+
+pa = PartitionAnalysis(table).fit()        # Train / Test / All data + Train+Test
+pa.ranks("Test")                           # MLmrpi ranks of one partition
+pa.rank_sum_table()                        # classic rank-sum of the metrics (Table 5)
+pa.cohen("metrics")                        # Cohen's kappa between metrics (Fig. 9)
+pa.split_agreement("metrics")              # Fleiss' kappa & Kendall's W per split (Fig. 10)
+pa.correlations("pearson")                 # MLmrpi vs metrics (Fig. 12)
+pa.tiers()                                 # Top 25 % / Middle 50 % / Bottom 25 % (Table 7)
+pa.significance()                          # Shapiro-Wilk & Wilcoxon p-values (Fig. 13)
+pa.cohen("methods")                        # Cohen's kappa between methods (Fig. 14)
+pa.cohen("metrics+methods", "Train")       # metrics and methods together (Fig. 15)
+pa.cohen("joint", "Train")                 # metrics vs MLmrpi(Train+Test) (Fig. 16)
+pa.mean_kappa()                            # average Cohen's kappa (Fig. 17)
+pa.split_agreement("methods")              # Fleiss' kappa & Kendall's W (Fig. 18)
+
+pa.to_excel("all_tables.xlsx")
+pa.plot_all("figures", fmt="pdf")          # all 24 figures
+```
+
+Partition labels are read from the column prefixes (`Total` is shown as *All data*);
+pass `partitions={"Train": "Train", "Test": "Test", "Total": "All data"}` to change them.
 
 ## Metric directions
 
@@ -125,10 +156,10 @@ The resolved directions are stored in `r.objectives_`.
 | `rank_by_metrics()`       | classical rank-sum aggregation of the individual metrics |
 | `agreement(include_metrics=False)` | Cohen's κ matrix, mean κ, Fleiss' κ, Kendall's W (+ p-value) |
 | `correlations("pearson"/"spearman")` | correlation of each MLmrpi with each metric |
-| `tiers(n_tiers=3)`        | mean metrics of the Top / Middle / Bottom models |
+| `tiers()`                 | mean metrics of the Top 25 % / Middle 50 % / Bottom 25 % models |
 | `significance()`          | Shapiro–Wilk and Wilcoxon p-values, MLmrpi rank vs. metric rank |
 | `stability(method, noise=0.02)` | rank stability under ±2 % random perturbation of the metrics |
-| `plot(kind)`              | `"scores"`, `"ranks"`, `"kappa"`, `"radar"` |
+| `plot(kind)`              | `"bars"` (paper Fig. 11), `"scores"`, `"ranks"`, `"kappa"`, `"radar"` |
 | `to_excel(path)`          | all of the above in one workbook |
 
 ## Example datasets
@@ -144,6 +175,22 @@ MLmrpi().fit(select_phase(df, ["Train", "Test"])).summary()   # joint train–te
 ```
 
 See `examples/reproduce_paper.py` for the full analysis of the paper.
+
+## Figures
+
+The figures follow the style and colours of the paper (`mlmrpi.plotting`):
+
+| Figure | Function | Colours |
+|---|---|---|
+| MLmrpi ranking (Fig. 11) | `plot_mlmrpi_bars` | AW green, DEAR blue, GRA orange, FA red, MRNV gray; rank on each bar |
+| Cohen's κ (Figs. 9, 14–16) | `plot_kappa` | `coolwarm` |
+| Fleiss' κ / Kendall's W (Figs. 10, 18) | `plot_split_agreement` | skyblue (metrics), lightsteelblue (methods), lightcoral (Kendall) |
+| Correlations (Fig. 12) | `plot_correlation` | `coolwarm` |
+| Shapiro–Wilk / Wilcoxon (Fig. 13) | `plot_pvalues` | `YlGnBu` / `coolwarm` |
+| Average Cohen's κ (Fig. 17) | `plot_mean_kappa` | matplotlib `tab10` |
+
+Every function returns the matplotlib figure and accepts `save="file.pdf"`.
+The colours are module constants (`METHOD_COLORS`, `KENDALL_COLOR`, ...) and can be overridden.
 
 ## Method details
 
@@ -163,6 +210,15 @@ eigenvalue > 1 are retained; PCⱼ = Σₖ (λₖ/Σλ) |Lⱼₖ| with loadings 
 rescaled to Σⱼ PCⱼ = 1.
 
 **Ranking**: descending MLmrpi; tied models share the best rank.
+
+**Agreement**: unweighted Cohen's κ and Fleiss' κ with rank values as categories;
+Kendall's W = 12S / (k²(n³ − n) − kT) with the tie correction T = Σ(t³ − t)
+(`tie_correction=False` gives the uncorrected formula). For a combination of data
+splits, Fleiss' κ stacks the splits (each model × split is one item) and Kendall's W
+pools the rankings of all splits as raters of the same models.
+
+**Tiers**: Top and Bottom tiers contain ⌈n/4⌉ models each, the Middle tier the rest
+(4 / 6 / 4 for 14 models).
 
 ## Citation
 

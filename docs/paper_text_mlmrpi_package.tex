@@ -72,7 +72,11 @@ r.plot("scores")              # ranked bar chart per method
 \end{verbatim}
 
 The same analysis is available from the command line
-(\texttt{mlmrpi rank metrics.csv}). The repository also contains the three
+(\texttt{mlmrpi rank metrics.csv}). When the table contains the metrics of several
+data partitions (training, testing and complete dataset), the \texttt{PartitionAnalysis}
+class (or \texttt{mlmrpi analyze metrics.csv}) ranks each partition and the joint
+training--testing set, and generates all the tables and figures presented in
+Section~\ref{subsec:MLmrpi_Rankings} with the same layout and colours. The repository also contains the three
 metric tables analysed in this paper (Tables~\ref{tab:Performance_ML_models},
 \ref{Case_study1_data} and~\ref{Case_study2_data}), a script reproducing the
 reported rankings and agreement statistics, and automated unit tests. Because the

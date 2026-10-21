@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mlmrpi"
-version = "1.0.0"
+version = "1.1.0"
 description = "MLmrpi: Machine Learning Multi-Response Performance Index for ranking ML models from precomputed performance metrics (AW, DEAR, GRA, FA, MRNV)."
 readme = "README.md"
 requires-python = ">=3.9"

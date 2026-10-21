@@ -119,9 +119,10 @@ class MLmrpi:
         self._check()
         return _rob.correlation_with_metrics(self.scores_, self.data_, method=method)
 
-    def tiers(self, n_tiers: int = 3) -> pd.DataFrame:
+    def tiers(self, fractions=(0.25, 0.50, 0.25)) -> pd.DataFrame:
+        """Mean metrics of the Top 25 % / Middle 50 % / Bottom 25 % models (Algorithm 2.2)."""
         self._check()
-        return _rob.performance_tiers(self.scores_, self.data_, n_tiers=n_tiers)
+        return _rob.performance_tiers(self.scores_, self.data_, fractions=fractions)
 
     def significance(self, alpha: float = 0.05) -> pd.DataFrame:
         self._check()
@@ -139,10 +140,19 @@ class MLmrpi:
                                               random_state=random_state)
 
     # --------------------------------------------------------------- output
-    def plot(self, kind: str = "scores", **kw):
-        """Shortcut to :mod:`mlmrpi.plotting` (``kind`` = scores | ranks | kappa | radar)."""
+    def plot(self, kind: str = "bars", **kw):
+        """Shortcut to :mod:`mlmrpi.plotting`.
+
+        kind = "bars"   : grouped bars, MLmrpi x100 with ranks (paper Fig. 11, default)
+               "scores" : one horizontal bar chart per method
+               "ranks"  : rank heat map
+               "kappa"  : Cohen's kappa heat map (``include_metrics=True`` adds the metrics)
+               "radar"  : normalized metrics of the best models
+        """
         self._check()
         from . import plotting
+        if kind == "bars":
+            return plotting.plot_mlmrpi_bars(self.scores_, **kw)
         if kind == "scores":
             return plotting.plot_scores(self.scores_, **kw)
         if kind == "ranks":
@@ -152,7 +162,7 @@ class MLmrpi:
                                        ("include_metrics",) if k in kw})["cohen_kappa"], **kw)
         if kind == "radar":
             return plotting.plot_radar(self.normalized_, **kw)
-        raise ValueError("kind must be 'scores', 'ranks', 'kappa' or 'radar'.")
+        raise ValueError("kind must be 'bars', 'scores', 'ranks', 'kappa' or 'radar'.")
 
     def to_excel(self, path: str) -> str:
         """Write every result table to one Excel workbook (one sheet per table)."""

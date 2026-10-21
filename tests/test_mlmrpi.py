@@ -146,7 +146,7 @@ def test_excel_and_plots(tmp_path):
     assert (tmp_path / "out.xlsx").exists() is False
     r.to_excel(tmp_path / "out.xlsx")
     assert (tmp_path / "out.xlsx").exists()
-    for kind in ("scores", "ranks", "kappa", "radar"):
+    for kind in ("bars", "scores", "ranks", "kappa", "radar"):
         r.plot(kind)
 
 
@@ -157,3 +157,48 @@ def test_cli(tmp_path, capsys):
     assert main(["rank", str(f), "--phase", "Test", "--out", str(tmp_path / "r.csv")]) == 0
     assert "Best model" in capsys.readouterr().out
     assert (tmp_path / "r.csv").exists()
+
+
+# ------------------------------------------------- paper reproduction (v1.1)
+def test_paper_table7_tiers():
+    """Top 25 % / Middle 50 % / Bottom 25 % tiers reproduce Table 7 of the paper."""
+    r = MLmrpi().fit(select_phase(datasets.load_rac(), "Train", strip=True))
+    t = r.tiers()[["R2", "RMSE", "MAE"]].round(2)
+    assert t.loc[("AW", "Top")].tolist() == [1.00, 1.13, 0.57]
+    assert t.loc[("GRA", "Top")].tolist() == [1.00, 1.09, 0.53]
+    assert t.loc[("GRA", "Middle")].tolist() == [0.96, 2.22, 1.60]
+    assert t.loc[("AW", "Bottom")].tolist() == [0.69, 6.64, 5.07]
+
+
+def test_paper_fig10_metric_agreement():
+    """Fleiss' kappa / Kendall's W of the metric rankings (Fig. 10), within rounding
+    of the two-decimal metrics published in the paper."""
+    from mlmrpi import PartitionAnalysis
+    sa = PartitionAnalysis(datasets.load_rac()).fit().split_agreement("metrics")
+    paper_f = [0.66, 0.72, 0.48, 0.69, 0.58, 0.60, 0.62]
+    paper_w = [0.98, 0.99, 0.91, 0.79, 0.90, 0.88, 0.82]
+    assert np.allclose(sa["Fleiss kappa"], paper_f, atol=0.045)
+    assert np.allclose(sa["Kendall W"], paper_w, atol=0.025)
+
+
+def test_paper_fig9_cohen_metrics():
+    from mlmrpi import PartitionAnalysis
+    K = PartitionAnalysis(datasets.load_rac()).fit().cohen("metrics").round(2)
+    assert K.loc["MSE(Train)", "RMSE(Train)"] == 1.0
+    assert K.loc["MSE(Train)", "MSE(Test)"] == 0.31
+    assert K.loc["MSE(Train)", "R2(Train)"] == 0.62
+
+
+def test_partition_analysis_outputs(tmp_path):
+    import matplotlib
+    matplotlib.use("Agg")
+    from mlmrpi import PartitionAnalysis
+    pa = PartitionAnalysis(datasets.load_case_study_1()).fit()
+    assert pa.joint_label_ == "Train+Test"
+    assert set(pa.split_agreement("both").columns) == {"Fleiss kappa", "Kendall W"}
+    assert pa.mean_kappa().shape[1] == 6
+    sig = pa.significance()
+    assert set(sig) == {"shapiro", "wilcoxon"}
+    files = pa.plot_all(str(tmp_path / "figs"), fmt="png")
+    assert len(files) >= 15
+    pa.to_excel(str(tmp_path / "all.xlsx"))

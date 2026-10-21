@@ -2,7 +2,8 @@
 
     python examples/reproduce_paper.py
 
-Writes tables and figures to examples/output/.
+Writes every table (Excel) and figure (PDF) to examples/output/.
+Equivalent command line:  mlmrpi analyze <file.csv> --figures <folder>
 """
 
 from pathlib import Path
@@ -12,56 +13,43 @@ import pandas as pd
 
 matplotlib.use("Agg")
 
-from mlmrpi import MLmrpi, datasets, select_phase
-from mlmrpi.agreement import agreement_report
-from mlmrpi.plotting import plot_kappa
+from mlmrpi import MLmrpi, PartitionAnalysis, datasets
 
 OUT = Path(__file__).parent / "output"
 OUT.mkdir(exist_ok=True)
-pd.set_option("display.width", 160)
+pd.set_option("display.width", 180)
+pd.set_option("display.max_columns", 30)
 
-df = datasets.load_rac()
-phases = {"Train": "Train", "Test": "Test", "Total": "Total", "Train-Test": ["Train", "Test"]}
+# ------------------------------------------------------------------ main dataset
+pa = PartitionAnalysis(datasets.load_rac()).fit()        # Train / Test / All data + Train+Test
 
-# 1. Rank-sum of the individual metrics (classical approach)
-for name, ph in phases.items():
-    if isinstance(ph, str):
-        print(f"\n--- Rank-sum of individual metrics: {name}")
-        print(MLmrpi().fit(select_phase(df, ph)).rank_by_metrics().T.to_string())
+print("Rank-sum of the individual metrics (Table 5)")
+print(pa.rank_sum_table().to_string())
 
-# 2. MLmrpi for each data partition
-all_ranks = {}
-for name, ph in phases.items():
-    r = MLmrpi().fit(select_phase(df, ph))
-    print(f"\n=== MLmrpi ranking: {name}")
-    print(r.summary().round(4).to_string())
-    a = r.agreement()
-    print(f"Fleiss' kappa = {a['fleiss_kappa']:.2f} | Kendall's W = {a['kendall_w']:.2f}")
-    r.plot("scores", save=OUT / f"mlmrpi_scores_{name}.png")
-    r.to_excel(OUT / f"mlmrpi_{name}.xlsx")
-    all_ranks.update({f"{m}({name})": r.ranks_[m] for m in r.methods})
+for lab in pa.labels_ + [pa.joint_label_]:
+    print(f"\nMLmrpi ranks - {lab} (Fig. 11)")
+    print(pa.ranks(lab).sort_values("GRA").T.to_string())
 
-    if name in ("Train", "Test", "Total"):
-        print("Spearman correlation with the metrics:")
-        print(r.correlations("spearman").round(2).to_string())
-        print("Performance tiers:")
-        print(r.tiers().round(2).to_string())
-        print("Wilcoxon signed-rank (MLmrpi rank vs metric rank) - any significant?",
-              r.significance()["Significant"].any())
+print("\nFleiss' kappa / Kendall's W of the metrics (Fig. 10)")
+print(pa.split_agreement("metrics").round(2).to_string())
+print("\nFleiss' kappa / Kendall's W of the methods (Fig. 18 a, c)")
+print(pa.split_agreement("methods").round(2).to_string())
+print("\nTiered mean metrics, Top 25 % / Middle 50 % / Bottom 25 % (Table 7)")
+print(pa.tiers().round(2).to_string())
+print("\nAverage Cohen's kappa (Fig. 17)")
+print(pa.mean_kappa().round(2).to_string())
 
-# 3. Agreement of methods across partitions (Train, Test, Total)
-R = pd.DataFrame(all_ranks)[[c for c in all_ranks if "Train-Test" not in c]]
-rep = agreement_report(R)
-plot_kappa(rep["cohen_kappa"], save=OUT / "cohen_kappa_methods_partitions.png")
-print(f"\nAll partitions: Fleiss' kappa = {rep['fleiss_kappa']:.2f}, Kendall's W = {rep['kendall_w']:.2f}")
+pa.to_excel(OUT / "mlmrpi_RAC_all_tables.xlsx")
+files = pa.plot_all(OUT / "figures_RAC", fmt="pdf")
+print(f"\n{len(files)} figures written to {OUT / 'figures_RAC'}")
 
-# 4. Independent case studies
-for name, loader in [("Case study 1", datasets.load_case_study_1),
-                     ("Case study 2", datasets.load_case_study_2)]:
-    r = MLmrpi().fit(loader())
+# -------------------------------------------------------- independent case studies
+for name, loader in [("Case study 1 (Huang et al. 2023)", datasets.load_case_study_1),
+                     ("Case study 2 (Cho et al. 2024)", datasets.load_case_study_2)]:
+    r = MLmrpi().fit(loader())                 # all metrics of the table together
     a = r.agreement()
     print(f"\n=== {name}: best model = {r.best_model()}, "
           f"Fleiss' kappa = {a['fleiss_kappa']:.2f}, Kendall's W = {a['kendall_w']:.2f}")
+    print("Average Cohen's kappa per method:")
     print(a["mean_cohen_kappa"].round(2).to_string())
-
-print(f"\nFigures and workbooks written to {OUT}")
+    r.plot("bars", save=OUT / f"{name.split(' (')[0].replace(' ', '_')}_ranking.pdf")

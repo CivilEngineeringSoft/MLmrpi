@@ -86,25 +86,34 @@ def fleiss_kappa(rankings: pd.DataFrame) -> float:
     return float((P_bar - P_e) / (1 - P_e))
 
 
-def kendall_w(rankings: pd.DataFrame, return_p: bool = False):
-    """Kendall's coefficient of concordance W (with tie correction).
+def kendall_w(rankings: pd.DataFrame, return_p: bool = False, tie_correction: bool = True):
+    """Kendall's coefficient of concordance W.
 
-    Rows = models (n), columns = rankings / raters (m). Returns W in [0, 1];
-    with ``return_p=True`` also returns the chi-square p-value
-    (chi2 = m (n - 1) W, df = n - 1).
+    Rows = models (n), columns = rankings / raters (k).
+
+    Algorithm 2.5 of the paper: R_i = sum of the ranks of model i,
+    S = sum (R_i - mean R)^2, W = 12 S / (k^2 (n^3 - n) - k T).
+    With ``tie_correction=True`` (default, reproduces the values reported in the
+    paper) tied ranks are replaced by average ranks and T = sum (t^3 - t) over the
+    groups of t tied models; with ``tie_correction=False`` T = 0 and the ranks are
+    used exactly as given.
+
+    With ``return_p=True`` also returns the chi-square p-value
+    (chi2 = k (n - 1) W, df = n - 1).
     """
     R = np.asarray(rankings, dtype=float)
     n, m = R.shape
-    # re-rank each column (average ranks) so W is valid for any rank convention
-    R = np.column_stack([stats.rankdata(R[:, j]) for j in range(m)])
+    T = 0.0
+    if tie_correction:
+        R = np.column_stack([stats.rankdata(R[:, j]) for j in range(m)])
+        for j in range(m):
+            _, cnt = np.unique(R[:, j], return_counts=True)
+            T += (cnt ** 3 - cnt).sum()
     Rsum = R.sum(axis=1)
     S = ((Rsum - Rsum.mean()) ** 2).sum()
-    T = 0.0
-    for j in range(m):
-        _, cnt = np.unique(R[:, j], return_counts=True)
-        T += (cnt ** 3 - cnt).sum()
     denom = m ** 2 * (n ** 3 - n) - m * T
     W = float(12 * S / denom) if denom > 0 else 1.0
+    W = min(W, 1.0)
     if not return_p:
         return W
     chi2 = m * (n - 1) * W
@@ -112,7 +121,9 @@ def kendall_w(rankings: pd.DataFrame, return_p: bool = False):
 
 
 def interpret_kappa(k: float) -> str:
-    """Landis & Koch (1977) verbal scale."""
+    """Verbal scale of the paper (Table 2, Landis & Koch 1977):
+    0.00-0.20 slight, 0.21-0.40 fair, 0.41-0.60 moderate, 0.61-0.80 substantial,
+    0.81-1.00 almost perfect (negative values: poor)."""
     if k < 0:
         return "poor"
     for lim, lab in ((0.20, "slight"), (0.40, "fair"), (0.60, "moderate"),

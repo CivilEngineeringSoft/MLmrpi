@@ -12,7 +12,7 @@ Quick start
 >>> r.agreement()        # Cohen's kappa, Fleiss' kappa, Kendall's W
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 from . import agreement, datasets, robustness
 from .agreement import cohen_kappa, cohen_kappa_matrix, fleiss_kappa, kendall_w
@@ -20,9 +20,10 @@ from .core import (METHODS, compute_mlmrpi, normalize, prepare_input, rank_by_me
                    rank_scores, select_phase)
 from .objectives import infer_objective, resolve_objectives
 from .ranker import MLmrpi
+from .partitions import PartitionAnalysis
 
 __all__ = [
-    "MLmrpi", "compute_mlmrpi", "rank_by_metrics", "rank_scores", "normalize",
+    "MLmrpi", "PartitionAnalysis","compute_mlmrpi", "rank_by_metrics", "rank_scores", "normalize",
     "prepare_input", "select_phase", "METHODS", "cohen_kappa", "cohen_kappa_matrix",
     "fleiss_kappa", "kendall_w", "infer_objective", "resolve_objectives",
     "agreement", "robustness", "datasets", "__version__",

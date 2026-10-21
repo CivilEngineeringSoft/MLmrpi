@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite the article below."
 title: "MLmrpi: Machine Learning Multi-Response Performance Index"
-version: 1.0.0
+version: 1.1.0
 date-released: 2026-10-21
 license: MIT
 repository-code: "https://github.com/CivilEngineeringSoft/MLmrpi"

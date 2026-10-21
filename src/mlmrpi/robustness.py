@@ -37,20 +37,39 @@ def correlation_with_metrics(scores: pd.DataFrame, metrics: pd.DataFrame,
     return out
 
 
+def _tier_groups(order, fractions):
+    """Split an ordered list of models into tiers.
+
+    Default (paper, Algorithm 2.2): Top 25 %, Middle 50 %, Bottom 25 %, where the
+    Top and Bottom tiers each contain ceil(n/4) models (e.g. 4 / 6 / 4 for 14 models).
+    """
+    order = list(order)
+    n = len(order)
+    if len(fractions) == 3 and np.isclose(fractions[0], fractions[2]):
+        k = min(int(np.ceil(fractions[0] * n - 1e-9)), n // 2)
+        return [order[:k], order[k:n - k], order[n - k:]]
+    cuts = np.round(np.cumsum(fractions)[:-1] * n).astype(int)
+    return [list(g) for g in np.split(np.asarray(order, dtype=object), cuts)]
+
+
 def performance_tiers(scores: pd.DataFrame, metrics: pd.DataFrame,
-                      n_tiers: int = 3, labels=("Top", "Middle", "Bottom")) -> pd.DataFrame:
-    """Inverse check: sort models by MLmrpi, split them into ``n_tiers`` groups and
-    return the mean of every metric per tier and method.
+                      fractions=(0.25, 0.50, 0.25),
+                      labels=("Top", "Middle", "Bottom")) -> pd.DataFrame:
+    """Inverse check (paper Algorithm 2.2): sort models by MLmrpi, split them into
+    Top (25 %), Middle (50 %) and Bottom (25 %) tiers and return the mean of every
+    metric per tier and method.
 
     Returns a DataFrame with a (method, tier) MultiIndex.
     """
-    if len(labels) != n_tiers:
-        labels = [f"Tier {i + 1}" for i in range(n_tiers)]
+    if not np.isclose(sum(fractions), 1.0):
+        raise ValueError("Tier fractions must sum to 1.")
+    if len(labels) != len(fractions):
+        labels = [f"Tier {i + 1}" for i in range(len(fractions))]
     metrics = metrics.loc[scores.index]
     rows = []
     for meth in scores.columns:
         order = scores[meth].sort_values(ascending=False).index
-        for lab, grp in zip(labels, np.array_split(np.asarray(order), n_tiers)):
+        for lab, grp in zip(labels, _tier_groups(order, fractions)):
             row = metrics.loc[list(grp)].mean()
             row.name = (meth, lab)
             rows.append(row)
