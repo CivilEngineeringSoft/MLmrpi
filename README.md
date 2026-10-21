@@ -7,7 +7,7 @@
 **MLmrpi** ranks machine-learning models from their **precomputed performance metrics**
 (R², MSE, RMSE, MAE, training time, … on the training, testing and/or full datasets)
 with a **single composite index**. Instead of comparing a dozen numbers by eye,
-you obtain one score per model — higher is better — computed by five
+you obtain one score per model - higher is better - computed by five
 multi-response methods:
 
 | Code   | Method                                   | Normalization | MLmrpi                                   |
@@ -230,4 +230,4 @@ If you use MLmrpi, please cite the paper (see `CITATION.cff`):
 
 ## License
 
-MIT — © 2026 Université Claude Bernard Lyon 1 (LMC², EA 7427). See `LICENSE`.
+MIT — © 2026 Université Claude Bernard Lyon 1 (LMC², EA 7427)/ULPGL-GOMA. See `LICENSE`.
