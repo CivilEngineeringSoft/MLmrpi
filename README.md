@@ -224,9 +224,11 @@ pools the rankings of all splits as raters of the same models.
 
 If you use MLmrpi, please cite the paper (see `CITATION.cff`):
 
-> Cirhuza Badesire, P., *et al.* (2026). MLmrpi: a multi-response performance index for
-> ranking machine-learning models from precomputed metrics. *Journal*, vol(issue), pages.
-> https://doi.org/xx.xxxx/xxxxx
+
+> Cirhuza Badesire, P., *et al.* (2026). Ranking Machine Learning Models for Predicting 
+> Recycled Aggregate Concrete Properties: Application of Multi-Response Methods.
+> 
+
 
 ## License
 
