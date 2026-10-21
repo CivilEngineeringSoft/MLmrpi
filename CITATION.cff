@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the article below."
+title: "MLmrpi: Machine Learning Multi-Response Performance Index"
+version: 1.0.0
+date-released: 2026-10-21
+license: MIT
+repository-code: "https://github.com/CivilEngineeringSoft/MLmrpi"
+authors:
+  - family-names: "Cirhuza Badesire"
+    given-names: "Paterne"
+    affiliation: "Université Claude Bernard Lyon 1, LMC² (EA 7427)"
+keywords:
+  - machine learning
+  - model ranking
+  - multi-response optimization
+  - grey relational analysis
+preferred-citation:
+  type: article
+  title: "<final title of the paper>"
+  authors:
+    - family-names: "Cirhuza Badesire"
+      given-names: "Paterne"
+  journal: "<journal>"
+  year: 2026
+  doi: "<doi>"

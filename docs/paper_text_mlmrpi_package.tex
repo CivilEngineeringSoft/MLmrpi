@@ -1,0 +1,115 @@
+% =====================================================================
+% Text to add to the MLmrpi paper to announce the Python package
+% Replace CivilEngineeringSoft and the version/DOI once the repository is public.
+% =====================================================================
+
+% ---------------------------------------------------------------------
+% (1) ABSTRACT — add at the end of the abstract
+% ---------------------------------------------------------------------
+To facilitate its adoption, the proposed framework is released as an open-source
+Python package, \texttt{mlmrpi}, available at
+\url{https://github.com/CivilEngineeringSoft/MLmrpi}.
+
+% ---------------------------------------------------------------------
+% (2) INTRODUCTION — add to the list of contributions (last paragraph)
+% ---------------------------------------------------------------------
+Finally, to make the $MLmrpi$ readily accessible to researchers and practitioners,
+the complete ranking and validation procedure is implemented in an open-source
+Python package, \texttt{mlmrpi}, which computes the index from any table of
+precomputed performance metrics in a single function call.
+
+% ---------------------------------------------------------------------
+% (3) METHODOLOGY — new subsection, to be placed after Method V (MRNV),
+%     replacing the paragraph "To implement these steps, we used the Python
+%     programming language ..." (or right after it)
+% ---------------------------------------------------------------------
+\subsection{Implementation: the \texttt{mlmrpi} Python package}\label{Methodology:MLmrpi_package}
+
+To make the proposed index accessible beyond this study, the five-step procedure
+of Figure~\ref{fig:mlmrpi_methodology} and the validation analyses of
+Sections~\ref{subsection:MLmrpi_robustness} and~\ref{Methodology:Ranking_Agreement}
+were implemented in an open-source Python package, \texttt{mlmrpi}, in the spirit
+of similar tools developed for classification problems \citep{Akshay2023}. The
+package relies only on standard scientific libraries (numpy, pandas, scipy and
+matplotlib) and is distributed under the MIT licence through a public GitHub
+repository (\url{https://github.com/CivilEngineeringSoft/MLmrpi}), from which it can be
+installed with a single command:
+
+\begin{verbatim}
+pip install git+https://github.com/CivilEngineeringSoft/MLmrpi.git
+\end{verbatim}
+
+The input of the package is the performance-metric table described in Step~1
+(one row per ML model, one column per precomputed metric, e.g. $R^2$, MSE, RMSE,
+MAE or training time for the training, testing and/or complete datasets), supplied
+as a pandas DataFrame or as a CSV/Excel file. The optimization direction of each
+metric (larger-the-better or smaller-the-better) is inferred automatically from its
+name and can be overridden by the user. The package then performs Steps~2 to 5 for
+the AW, DEAR, GRA, FA and MRNV methods and returns, for each model, the $MLmrpi$
+value, the rank obtained with each method and a consensus rank. The GRA
+distinguishing coefficient ($\lambda=0.5$ by default), the eigenvalue threshold of
+the factor analysis (Kaiser criterion, eigenvalue $>1$) and optional metric weights
+are exposed as parameters.
+
+Besides the ranking itself, the package provides the tools used in this work to
+verify the reliability of a ranking: the classical rank-sum aggregation of the
+individual metrics; Cohen's $\kappa$, Fleiss' $\kappa$ and Kendall's $W$ for
+the agreement among methods and metrics; Pearson and Spearman correlations between
+$MLmrpi$ and the individual metrics; the Top/Middle/Bottom performance grouping;
+and the Shapiro--Wilk and Wilcoxon signed-rank tests. Results can be exported to
+an Excel workbook and visualized (ranked bar charts, rank heat maps, $\kappa$
+matrices and radar charts). A minimal example is given below:
+
+\begin{verbatim}
+import pandas as pd
+from mlmrpi import MLmrpi
+
+table = pd.read_csv("metrics.csv", index_col="Model")
+r = MLmrpi().fit(table)       # AW, DEAR, GRA, FA and MRNV
+print(r.summary())            # MLmrpi values and ranks
+print(r.agreement())          # Cohen's kappa, Fleiss' kappa, Kendall's W
+r.plot("scores")              # ranked bar chart per method
+\end{verbatim}
+
+The same analysis is available from the command line
+(\texttt{mlmrpi rank metrics.csv}). The repository also contains the three
+metric tables analysed in this paper (Tables~\ref{tab:Performance_ML_models},
+\ref{Case_study1_data} and~\ref{Case_study2_data}), a script reproducing the
+reported rankings and agreement statistics, and automated unit tests. Because the
+package operates only on precomputed metrics, it is independent of the library used
+to train the models and applies equally to regression and classification problems.
+
+% ---------------------------------------------------------------------
+% (4) CONCLUSION — add as the last point / sentence
+% ---------------------------------------------------------------------
+The $MLmrpi$ framework has been released as the open-source Python package
+\texttt{mlmrpi}, allowing researchers to rank their own models and to assess the
+reliability of the resulting rankings with a few lines of code, thereby promoting
+transparent and reproducible model selection.
+
+% ---------------------------------------------------------------------
+% (5) CODE AVAILABILITY statement (before the references)
+% ---------------------------------------------------------------------
+\section*{Code availability}
+The \texttt{mlmrpi} Python package (version 1.0.0), including the datasets of
+Tables~\ref{tab:Performance_ML_models}, \ref{Case_study1_data} and~\ref{Case_study2_data}
+and the scripts reproducing the results of this paper, is freely available at
+\url{https://github.com/CivilEngineeringSoft/MLmrpi} under the MIT licence.
+% Recommended: archive the release on Zenodo and cite its DOI here, e.g.
+% (archived version: \url{https://doi.org/10.5281/zenodo.XXXXXXX}).
+
+% ---------------------------------------------------------------------
+% (6) BibTeX entry for the reference cited above
+% ---------------------------------------------------------------------
+% @article{Akshay2023,
+%   author  = {Akshay, Akshay and Abedi, Masoud and Shekarchizadeh, Navid and
+%              Burkhard, Fiona C. and Katoch, Mitali and Bigger-Allen, Alex and
+%              Adam, Rosalyn M. and Monastyrskaya, Katia and Hashemi Gheinani, Ali},
+%   title   = {{MLcps}: machine learning cumulative performance score for
+%              classification problems},
+%   journal = {GigaScience},
+%   volume  = {12},
+%   pages   = {1--9},
+%   year    = {2023},
+%   doi     = {10.1093/gigascience/giad108}
+% }
