@@ -1,11 +1,3 @@
-"""Reproduce the MLmrpi analysis of the paper on the bundled datasets.
-
-    python examples/reproduce_paper.py
-
-Writes every table (Excel) and figure (PDF) to examples/output/.
-Equivalent command line:  mlmrpi analyze <file.csv> --figures <folder>
-"""
-
 from pathlib import Path
 
 import matplotlib
