@@ -48,12 +48,7 @@ preferred-citation:
     - family-names: "Bishweka"
       given-names: "Chérif"
       affiliation: "Université Libre des Pays des Grands Lacs (ULPGL), Goma, DR Congo"
-  # Once the article is accepted: replace the status line by
-  #   journal: "<journal name>"
-  #   volume: <volume>
-  #   start: <first page or article number>
-  #   doi: "<doi>"
-  # and update the year if needed.
+  
   status: in-preparation
   year: 2026
   keywords:
