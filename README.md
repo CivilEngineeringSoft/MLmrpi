@@ -239,4 +239,4 @@ If you use MLmrpi, please cite the paper (see `CITATION.cff`):
 
 ## License
 
-MIT — © 2026 Université Claude Bernard Lyon 1 (LMC², EA 7427). See `LICENSE`.
+MIT — © 2026 Université Claude Bernard Lyon 1 - ULPGL GOMA. See `LICENSE`.
