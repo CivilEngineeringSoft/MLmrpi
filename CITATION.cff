@@ -31,11 +31,13 @@ keywords:
   - recycled aggregate concrete
 preferred-citation:
   type: article
-  title: "Ranking Machine Learning Models for Predicting the Compressive Strength of Recycled Aggregate Concrete: A Statistically Validated Multi-Response Performance Index"
+  title: "Ranking Machine Learning Models for Predicting the Compressive Strength of Recycled 
+          Aggregate Concrete: A Statistically Validated Multi-Response Performance Index"
   authors:
     - family-names: "Cirhuza Badesire"
       given-names: "Paterne"
-      affiliation: "Université Claude Bernard Lyon 1, LMC² (EA 7427), Villeurbanne, France; Université Libre des Pays des Grands Lacs (ULPGL), Goma, DR Congo"
+      affiliation: "Université Claude Bernard Lyon 1, LMC² (EA 7427), Villeurbanne, France; 
+                      Université Libre des Pays des Grands Lacs (ULPGL), Goma, DR Congo"
     - family-names: "Di Cesare"
       given-names: "Noëlie"
       affiliation: "Université Claude Bernard Lyon 1, MatéIS UMR 5510-PVMH Team, Villeurbanne, France"
